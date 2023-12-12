@@ -164,3 +164,93 @@ In this example, a trigger is created to automatically update the `updated_at` t
 - **Triggers:** Allow you to automate actions based on specific events, helping enforce additional business rules or maintain consistency.
 
 Together, these mechanisms contribute to the overall consistency and integrity of the data in a MySQL database, reducing the risk of errors and ensuring that the data remains accurate and reliable.
+
+
+### Isolation Levels
+
+#### Repeatable Reads
+
+Provides consistent views within the transaction no matter if the other transaction commits a new value.
+
+```
+select @@transaction_ISOLATION;
++-------------------------+
+| @@transaction_ISOLATION |
++-------------------------+
+| REPEATABLE-READ         |
++-------------------------+
+
+describe users;
+
+```
+
+
+
+Open two terminals side-to-side and start firing two Txs concurrently
+
+Terminal 1 
+
+```
+SELECT * FROM users WHERE user_id=1;
+
++---------+----------+-------------------+---------------------+
+| user_id | username | email             | created_at          |
++---------+----------+-------------------+---------------------+
+|       1 | user1    | user1@example.com | 2023-12-12 09:05:09 |
++---------+----------+-------------------+---------------------+
+
+
+UPDATE users SET email='user1@isolation.com' WHERE user_id=1;
+
+
+<Repeat query>
+
+COMMIT;
+
+```
+
+
+
+Terminal 2
+
+```
+SELECT * FROM users WHERE user_id=1;
+
++---------+----------+-------------------+---------------------+
+| user_id | username | email             | created_at          |
++---------+----------+-------------------+---------------------+
+|       1 | user1    | user1@example.com | 2023-12-12 09:05:09 |
++---------+----------+-------------------+---------------------+
+
+
+<AFTER Tx1 COMMIT>
+
+SELECT * FROM users WHERE user_id=1;
+
+```
+
+You will still see the same value. Once you `COMMIT` or `ROLLBACK` the transaction, and fire the query again, we should be able to see the latest updated value set by Tx1.
+
+
+#### Serializable Reads
+
+```
+SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE;
+UPDATE users SET email='user1@example.com' WHERE user_id=1;
+```
+
+#### Read Committed
+
+```
+SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED;
+UPDATE users SET email='user1@readcommitted.com' WHERE user_id=1;
+```
+
+#### Read Uncommitted
+
+```
+SET SESSION TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;
+UPDATE users SET email='user1@example.com' WHERE user_id=1;
+```
+
+
