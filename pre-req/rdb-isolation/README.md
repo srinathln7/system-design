@@ -337,5 +337,6 @@ SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE;
 
 ```
 
+You can see only one Tx can go through and the other one deadlocks.
 
 
