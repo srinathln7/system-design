@@ -253,4 +253,89 @@ SET SESSION TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;
 UPDATE users SET email='user1@example.com' WHERE user_id=1;
 ```
 
+#### Serializable Isolation Vs Repeatable Isolation 
+
+
+
+```
+CREATE TABLE gamble (
+    user_id INT ,
+    bet INT
+);
+
+
+INSERT INTO gamble (user_id, bet) VALUES
+    (1, 10),
+    (1, 30),
+    (2, 10),
+    (2, 50);
+
+## check that the data has been inserted
+
+SELECT * FROM gamble;
+
+```
+
+
+```
+SET SESSION TRANSACTION ISOLATION LEVEL REPEATABLEREAD;
+
+```
+
+Tx_A: 
+
+```
+-- Start of Transaction Tx_A
+START TRANSACTION;
+
+-- Read the current sum of bets for user_id=1
+SELECT SUM(bet) INTO @sum_bets_user1 FROM gamble WHERE user_id = 1;
+
+-- Insert a new row for user_id=2 with the sum of bets for user_id=1
+INSERT INTO gamble (user_id, bet) VALUES (2, @sum_bets_user1);
+
+-- Commit the transaction
+COMMIT;
+
+```
+
+
+Tx_B:
+
+```
+-- Start of Transaction Tx_B
+START TRANSACTION;
+
+-- Read the current sum of bets for user_id=2
+SELECT SUM(bet) INTO @sum_bets_user2 FROM gamble WHERE user_id = 2;
+
+-- Insert a new row for user_id=1 with the sum of bets for user_id=2
+INSERT INTO gamble (user_id, bet) VALUES (1, @sum_bets_user2);
+
+-- Commit the transaction
+COMMIT;
+
+```
+
+Reset if necessary
+```
+DELETE FROM gamble
+WHERE (user_id = 2 AND bet = 40) OR (user_id = 1 AND bet = 100);
+
+DELETE FROM gamble
+WHERE bet IS NULL;
+
+
+```
+
+
+```
+SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE;
+
+
+## Repeat Tx_A and Tx_B
+
+```
+
+
 
