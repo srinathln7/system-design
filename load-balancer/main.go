@@ -10,7 +10,6 @@ import (
 
 var (
 	serverIDCounter int
-	idCounterMutex  sync.Mutex
 )
 
 type Server struct {
@@ -19,9 +18,10 @@ type Server struct {
 
 type LoadBalancer struct {
 	done chan interface{}
-	reqs []int
 	mu   sync.RWMutex
 	wg   sync.WaitGroup
+
+	reqs []int
 }
 
 func newLoadBalancer() *LoadBalancer {
@@ -40,11 +40,7 @@ func (lb *LoadBalancer) addRequest(reqID int) {
 
 // newServer creates a new server instance with an auto-incremented ID
 func newServer() *Server {
-	idCounterMutex.Lock()
-	defer idCounterMutex.Unlock()
-
 	serverIDCounter++
-
 	log.Printf("created server%d", serverIDCounter)
 	return &Server{id: serverIDCounter}
 }
@@ -55,14 +51,11 @@ func (s *Server) doWork(reqID int, lb *LoadBalancer) <-chan string {
 	// Simulate computing the response
 	resCh := make(chan string)
 	response := "response for request" + strconv.Itoa(reqID)
-
 	go func() {
 		defer close(resCh)
-		for {
-			select {
-			case <-lb.done:
-			case resCh <- fmt.Sprintf("server %d computed %s", s.id, response):
-			}
+		select {
+		case <-lb.done:
+		case resCh <- fmt.Sprintf("server %d computed %s", s.id, response):
 		}
 	}()
 
@@ -70,20 +63,19 @@ func (s *Server) doWork(reqID int, lb *LoadBalancer) <-chan string {
 }
 
 func main() {
-
 	// Create a load balancer
 	lb := newLoadBalancer()
 	defer close(lb.done)
 
+	// Create 5-virtual servers
 	var num_of_servers int = 5
 	servers := make([]*Server, num_of_servers)
-	// Create 5-virtual servers
 	for i := 0; i < num_of_servers; i++ {
 		servers[i] = newServer()
 	}
 
 	// Simulate adding a few requests to the load balancer
-	var num_of_reqs int = 100000
+	var num_of_reqs int = 100
 	for i := 1; i <= num_of_reqs; i++ {
 		lb.wg.Add(1)
 		go lb.addRequest(i)
@@ -92,6 +84,7 @@ func main() {
 	lb.wg.Wait()
 	log.Printf("added %d requests to the load balancer", num_of_reqs)
 
+	// Implement a simple round-robin algorithm
 	var res string
 	for reqID := 1; reqID <= num_of_reqs; reqID++ {
 		select {
