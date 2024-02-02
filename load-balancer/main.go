@@ -75,7 +75,7 @@ func main() {
 	}
 
 	// Simulate adding a few requests to the load balancer
-	var num_of_reqs int = 100
+	var num_of_reqs int = 10000
 	for i := 1; i <= num_of_reqs; i++ {
 		lb.wg.Add(1)
 		go lb.addRequest(i)
@@ -90,6 +90,8 @@ func main() {
 		select {
 		case res = <-servers[reqID%num_of_servers].doWork(reqID, lb):
 			log.Println(res)
+		case _ = <-lb.done:
+			log.Fatal("operation cancelled")
 		case <-time.After(1 * time.Second):
 			log.Println("request timed out")
 		}
