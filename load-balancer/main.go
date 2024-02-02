@@ -55,6 +55,7 @@ func (s *Server) doWork(reqID int, lb *LoadBalancer) <-chan string {
 		defer close(resCh)
 		select {
 		case <-lb.done:
+			log.Fatal("load balancer terminated abruptly")
 		case resCh <- fmt.Sprintf("server %d computed %s", s.id, response):
 		}
 	}()
@@ -75,7 +76,7 @@ func main() {
 	}
 
 	// Simulate adding a few requests to the load balancer
-	var num_of_reqs int = 10000
+	var num_of_reqs int = 1000000
 	for i := 1; i <= num_of_reqs; i++ {
 		lb.wg.Add(1)
 		go lb.addRequest(i)
@@ -90,8 +91,6 @@ func main() {
 		select {
 		case res = <-servers[reqID%num_of_servers].doWork(reqID, lb):
 			log.Println(res)
-		case _ = <-lb.done:
-			log.Fatal("operation cancelled")
 		case <-time.After(1 * time.Second):
 			log.Println("request timed out")
 		}
