@@ -157,6 +157,46 @@ In conclusion, there is no one-size-fits-all solution when it comes to API archi
      - Hardens systems against unpredictable real-world usage.
 
 
+## API optimization techniques
+
+The video discusses seven optimization techniques to improve API performance:
+
+1. **Caching**:
+   - Caching stores the result of expensive computations to reuse them later without redoing the computation.
+   - Frequently accessed endpoints with the same request parameters can benefit from caching in Redis or Memcached, reducing database hits and improving speed.
+
+2. **Connection Pooling**:
+   - Maintaining a pool of open connections instead of opening a new database connection for each API call can improve throughput.
+   - Reusing connections reduces the overhead of establishing new connections for each request.
+
+3. **Avoiding N+1 Query Problems**:
+   - The N+1 query problem occurs when accessing data and related entities, resulting in excessive database queries.
+   - Fetching data in a single query or optimizing queries to reduce round trips to the database can improve efficiency.
+
+4. **Pagination**:
+   - Breaking large API responses into smaller, manageable pages using pagination parameters like limit and offset reduces data transfer and client-side load.
+
+5. **Using Lightweight JSON Serializers**:
+   - Fast serialization libraries minimize the time spent converting data into JSON format, improving response times for JSON responses.
+
+6. **Compression**:
+   - Enabling compression on large API response payloads reduces the amount of data transferred over the network, improving performance.
+   - Efficient compression algorithms like Brotli and CDN support for compression further enhance performance.
+
+7. **Asynchronous Logging**:
+   - Asynchronous logging involves placing log entries into an in-memory buffer by the main application thread while a separate logging thread writes the log entries.
+   - This reduces the time taken to write logs, particularly in high-throughput systems, but there's a small risk of losing logs if the application crashes before logs are written.
+
+**Pros**:
+- These optimization techniques can significantly improve API performance, making applications faster and more efficient.
+- They address common performance bottlenecks and reduce latency, enhancing the user experience.
+
+**Cons**:
+- Implementing some of these techniques, such as caching and connection pooling, may introduce additional complexity to the application.
+- Asynchronous logging carries a risk of losing logs if the application crashes before logs are written, requiring careful implementation and monitoring.
+
+Overall, these optimization techniques provide valuable strategies for improving API performance when implemented judiciously and tailored to specific application requirements.
+
 ## Deployment Strategies
 - **Introduction to Deployment Strategies:**
   - Emphasizes the importance of deploying code to production and the challenges involved.
