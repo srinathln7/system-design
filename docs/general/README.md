@@ -1,8 +1,72 @@
-# Genral Concepts
+# General Concepts
+
+## HTTP Status Codes
+
+1. **2xx - Success**:
+   - **200 OK**: Indicates that the request was successful.
+   - **201 Created**: Indicates that a new resource was successfully created.
+   - **204 No Content**: Indicates that the request was successful, but there is no content to return.
+
+2. **4xx - Client Error**:
+   - **400 Bad Request**: Indicates that the server could not understand the request due to invalid syntax.
+   - **401 Unauthorized**: Indicates that authentication is required and has failed or has not been provided.
+   - **403 Forbidden**: Indicates that the server understood the request but refuses to authorize it.
+   - **404 Not Found**: Indicates that the requested resource could not be found on the server.
+
+3. **429 - Too Many Requests**:
+   - Indicates that the user has sent too many requests in a given amount of time.
+
+4. **5xx - Server Error**:
+   - **500 Internal Server Error**: Indicates that the server encountered an unexpected condition that prevented it from fulfilling the request.
+   - **502 Bad Gateway**: Indicates that the server, while acting as a gateway or proxy, received an invalid response from the upstream server it accessed in attempting to fulfill the request.
+   - **503 Service Unavailable**: Indicates that the server is currently unable to handle the request due to temporary overloading or maintenance of the server.
+
+5. **3xx - Redirection**:
+   - **301 Moved Permanently**: Indicates that the requested resource has been permanently moved to a new location.
+   - **302 Found**: Indicates that the requested resource temporarily resides under a different URL.
+   - **304 Not Modified**: Indicates that the resource has not been modified since the version specified by the request headers, resulting in no content being returned.
+
+6. **1xx - Informational**:
+   - **101 Switching Protocols**: Indicates that the server understands and is willing to comply with the client's request to change the protocol being used on this connection.
+
+**Pro-Tips**:
+- Start with the basics when tackling status code issues: check request headers and body, ensure the correct HTTP method is used, and confirm the endpoint URL.
+- Use tools like Postman or Insomnia for testing requests and inspecting responses.
+- Check server logs for additional insights if available.
+
+These status codes are essential for understanding the outcome of HTTP requests and troubleshooting issues in web applications, mobile apps, or APIs.
+
+
+## HTTPS:
+
+1. **Introduction to HTTPS**:
+   - HTTPS encrypts data sent over the Internet, making it unreadable by anyone other than the sender and receiver.
+   - HTTPS is an extension of HTTP, with data sent in encrypted form using TLS (Transport Layer Security).
+
+2. **TLS Handshake**:
+   - **Step 1**: The browser establishes a TCP connection with the server.
+   - **Step 2**: TLS handshake begins with the client sending a "Client Hello" message to the server, specifying TLS version and supported cipher suites.
+   - **Step 3**: The server selects the TLS version and cipher suite and sends them back to the client in a "Server Hello" message along with its certificate, including the public key.
+   - **Step 4**: The client generates an encryption key, encrypts it with the server's public key, and sends it back to the server.
+   - **Step 5**: The server decrypts the key using its private key, establishing a shared encryption key for secure communication.
+
+3. **Symmetric Encryption**:
+   - The shared encryption key is used for symmetric encryption, where data encrypted on one end can only be decrypted by the other end.
+   - Symmetric encryption is more efficient for bulk data transmission compared to asymmetric encryption.
+
+4. **TLS Versions**:
+   - TLS 1.2 and TLS 1.3 are discussed, with TLS 1.3 optimized to reduce the number of network round trips required for the handshake.
+
+5. **Asymmetric Encryption**:
+   - RSA is used as an example of asymmetric encryption for securely exchanging the symmetric session key.
+   - Diffie-Hellman is mentioned as a more common method in TLS 1.3 for exchanging session keys without transmitting public keys over the network.
+
+6. **Conclusion**:
+   - The video concludes by encouraging viewers to learn more about system design through books and newsletters.
+
+Overall, the transcript provides a clear explanation of how HTTPS works and the TLS handshake process, including key concepts like encryption, cipher suites, and asymmetric encryption methods.
 
 ## Network protocols
-
-The video discusses the top 8 most popular network protocols:
 
 1. **HTTP (Hypertext Transfer Protocol)**:
    - HTTP is the backbone of web development, using a request-response model for clients to request resources from servers.
