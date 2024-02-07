@@ -76,7 +76,7 @@ func main() {
 	}
 
 	// Simulate adding a few requests to the load balancer
-	var num_of_reqs int = 1000000
+	var num_of_reqs int = 10
 	for i := 1; i <= num_of_reqs; i++ {
 		lb.wg.Add(1)
 		go lb.addRequest(i)
