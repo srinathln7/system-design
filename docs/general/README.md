@@ -109,15 +109,44 @@ In conclusion, these network protocols play crucial roles in enabling communicat
 
 ## CDN
 
-- **Introduction to CDN:** Explains that a CDN, or content delivery network, has been around since the late 90s and was initially developed to speed up the delivery of static HTML content globally.
+- **Introduction to CDN:** A CDN is a geographically distributed group of servers that caches content close to end users. It allows for quick transfer of assets needed for loading Internet content, including HTML pages, JavaScript files, stylesheets, images, and videos. The primary purpose of a CDN is to reduce latency in communication between websites and users. CDNs improve efficiency by introducing intermediary servers between clients and website servers, reducing web traffic, bandwidth consumption, and improving user experience.
 
-- **Evolution and Purpose:** Highlights that CDNs have evolved and are now essential whenever HTTP traffic is served, improving web service performance by bringing content closer to users.
+- **Evolution and Purpose:** Highlights that CDNs have evolved and are now essential whenever HTTP traffic is served, improving web service performance by bringing content closer to users. The majority of web traffic today is served through CDNs, including traffic from major sites like Facebook, Netflix, and Amazon. CDNs can also help protect websites against common malicious attacks like Distributed Denial of Service (DDOS) attacks.
 
 - **CDN Infrastructure:** Describes the deployment of servers, known as Point of Presence (PoPs), worldwide to ensure users can access fast-edge servers. Introduces technologies like DNS-based routing and Anycast to direct user requests to the closest PoP.
 
-- **Functionality of Edge Servers:** Explains that edge servers act as reverse proxies with content caches, reducing the load on origin servers by serving cached static content and transforming content into optimized formats on-the-fly.
+**Difference from Web Hosting**: While a CDN does not host content and cannot replace the need for proper web hosting, it caches content at the network edge to improve website performance. Many websites opt for CDNs to address performance issues encountered with traditional hosting services.
 
-- **Security and Availability Benefits:** States that modern CDNs provide security against DDoS attacks due to their large network capacity and improved availability by distributing content across many PoPs, making them resilient to hardware failures.
+- **Functionality of Edge Servers:** Explains that edge servers act as reverse proxies with content caches, reducing the load on origin servers by serving cached static content and transforming content into optimized formats on-the-fly.
+ 
+- **Benefits of Using a CDN**:
+   - **Improving website load times**: By distributing content closer to website visitors, CDNs reduce load times, lower bounce rates, and increase visitor engagement.
+   - **Reducing bandwidth costs**: CDNs optimize caching and other techniques to reduce data transfer from origin servers, thus reducing hosting costs.
+   - **Increasing content availability and redundancy**: CDNs handle large traffic volumes and hardware failures better than origin servers.
+   - **Improving website security**: CDNs offer DDoS mitigation, security certificate improvements, and other security optimizations. 
+
+   - **Improvement of Website Load Times**:
+   - CDNs reduce distance between users and website resources, utilize hardware and software optimizations, and reduce data transfer through file size reduction and TLS/SSL certificate optimization.
+
+   - **Reliability and Redundancy**:
+   - CDNs ensure uptime through load balancing, intelligent failover, and Anycast routing to transfer traffic to available data centers in case of hardware failures or technical issues.
+
+   - **Data Security**:
+   - CDNs protect data with TLS/SSL certificates to ensure authentication, encryption, and integrity.
+
+   - **Bandwidth Expense**:
+   - CDNs reduce bandwidth costs by minimizing origin server requests and optimizing data transfer. For example, Cloudflare CDN reduces origin requests and bandwidth    costs. 
+
+- **How CDNs Work**:
+   - CDNs are a network of servers aimed at delivering content quickly, cheaply, reliably, and securely.
+   - They place servers at Internet exchange points (IXPs) to improve speed and connectivity.
+   - CDNs make optimizations on client/server data transfers, place data centers strategically, enhance security, and manage various types of failures and Internet congestion.
+   - Work on principles of caching, dynamic acceleration, and edge logic computations to optimize data delivery.
+
+- **Usecases**
+   - High-speed content delivery for global, whole-site experiences.
+   - Real-time streaming for rich media files.
+   - Multi-user scaling to support large numbers of concurrent users, as seen in gaming platforms like King.    
 
 ## Forward vs Reverse proxy
 
