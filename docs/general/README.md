@@ -125,23 +125,23 @@ In conclusion, these network protocols play crucial roles in enabling communicat
    - **Increasing content availability and redundancy**: CDNs handle large traffic volumes and hardware failures better than origin servers.
    - **Improving website security**: CDNs offer DDoS mitigation, security certificate improvements, and other security optimizations. 
 
-   - **Improvement of Website Load Times**:
+   ### **Improvement of Website Load Times**:
    - CDNs reduce distance between users and website resources, utilize hardware and software optimizations, and reduce data transfer through file size reduction and TLS/SSL certificate optimization.
 
-   - **Reliability and Redundancy**:
+   ### **Reliability and Redundancy**:
    - CDNs ensure uptime through load balancing, intelligent failover, and Anycast routing to transfer traffic to available data centers in case of hardware failures or technical issues.
 
-   - **Data Security**:
+   ### **Data Security**:
    - CDNs protect data with TLS/SSL certificates to ensure authentication, encryption, and integrity.
 
-   - **Bandwidth Expense**:
+   ### **Bandwidth Expense**:
    - CDNs reduce bandwidth costs by minimizing origin server requests and optimizing data transfer. For example, Cloudflare CDN reduces origin requests and bandwidth    costs. 
 
 - **How CDNs Work**:
    - CDNs are a network of servers aimed at delivering content quickly, cheaply, reliably, and securely.
    - They place servers at Internet exchange points (IXPs) to improve speed and connectivity.
    - CDNs make optimizations on client/server data transfers, place data centers strategically, enhance security, and manage various types of failures and Internet congestion.
-   - Work on principles of caching, dynamic acceleration, and edge logic computations to optimize data delivery.
+   - Work on principles of **caching, dynamic acceleration, and edge logic computations** to optimize data delivery.
 
 - **Usecases**
    - High-speed content delivery for global, whole-site experiences.
