@@ -290,6 +290,27 @@ The video discusses seven optimization techniques to improve API performance:
 
 Overall, these optimization techniques provide valuable strategies for improving API performance when implemented judiciously and tailored to specific application requirements.
 
+### RESTful API Design Tips
+
+1. **Clear Naming:** Use straightforward and logical names for APIs. Choose descriptive names that convey the purpose of the API, such as using plurals for resource collections.
+
+2. **Reliability through Idempotent APIs:** Ensure that making the same API call multiple times has the same effect as calling it once. Idempotent APIs prevent duplicate actions and ensure consistency, especially for operations like creating, reading, updating, and deleting resources.
+
+3. **Versioning:** Implement versioning in APIs to support backward compatibility and allow for updates without breaking existing applications. Versioning helps developers using older versions of the API to upgrade at their own pace.
+
+4. **Pagination:** Control the amount of data returned by APIs by implementing pagination. This prevents overwhelming API consumers with large data sets and enhances performance by fetching data in smaller chunks.
+
+5. **Clear Query String for Sorting and Filtering:** Use clear query strings for sorting and filtering API data. This makes response data easy to understand and allows for additional sorting and filtering criteria to be added over time without breaking existing integrations.
+
+6. **Security:** Prioritize security when designing APIs, especially for sensitive credentials like API keys. Leverage HTTP headers over URLs for passing credentials and implement robust access controls and encryption to protect against potential security threats.
+
+7. **Keep Cross-Resource References Simple:** Use clear linking between connected resources to avoid cluttering with long query strings. Direct paths make associations clear for developers using the API.
+
+8. **Plan for Rate Limiting:** Implement rate limiting to protect APIs from overload and abuse. Set request quotas based on various dimensions like source IP addresses, user accounts, or endpoint categories to ensure fair usage and protect infrastructure from denial-of-service (DoS) attacks.
+
+By following these best practices, we can create robust, reliable, and secure APIs that are a pleasure to work with and can be relied upon by companies and developers for long-term use.
+
+
 ## Deployment Strategies
 - **Introduction to Deployment Strategies:**
   - Emphasizes the importance of deploying code to production and the challenges involved.
