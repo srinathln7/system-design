@@ -207,6 +207,29 @@ The video discusses the top 6 most popular API architecture styles, each with it
 
 In conclusion, there is no one-size-fits-all solution when it comes to API architecture styles. Developers should carefully evaluate their project requirements and choose the style that best fits their needs for efficiency, scalability, and ease of implementation.
 
+### GraphQL vs REST
+
+1. **Definition:** GraphQL provides a schema of the data in the API and allows clients to request exactly what they need. It sits between clients and backend services, aggregating multiple resource requests into a single query and supporting mutations and subscriptions.
+
+2. **Similarities with REST:**
+   - Both GraphQL and REST send HTTP requests and receive HTTP responses.
+   - They both use URLs for making requests and can return JSON responses.
+
+3. **Differences from REST:**
+   - With GraphQL, clients specify the exact resources and fields they want, while REST APIs may include related resources in the response without client control.
+   - GraphQL uses a schema to define available resources instead of URLs, allowing complex queries to fetch additional data based on schema-defined relationships.
+   - While REST requests can be made using common tools like cURL or web browsers, GraphQL requires heavier tooling support on both client and server sides.
+
+4. **Drawbacks of GraphQL:**
+   - GraphQL requires a larger upfront investment in tooling support compared to REST, especially for simple CRUD APIs.
+   - It's more difficult to cache GraphQL responses effectively compared to REST due to its single point of entry and default use of HTTP POST, limiting the leverage of HTTP caching mechanisms.
+   - GraphQL's flexibility in querying specific data poses risks of unexpected resource-intensive queries, which can potentially bring down backend services if not properly managed.
+
+5. **Considerations for Using GraphQL:**
+   - Software engineering involves trade-offs, and there's no one right answer. Organizations should carefully consider the trade-offs, complexities, and risks associated with adopting GraphQL for high-scale production use.
+
+Overall, GraphQL offers powerful features for flexible data querying but requires careful consideration and management of its complexities and potential drawbacks, especially in high-scale production environments.
+
 ## API testing
 
 - **Introduction to API Testing:**
@@ -474,4 +497,20 @@ Overall, CI/CD is a powerful practice that can significantly improve the efficie
     - Processes and threads have distinct characteristics and roles in program execution.
     - Understanding their differences is crucial for efficient resource management and program design.
 
-  
+## Bloom Filters
+
+1. **Definition:** A Bloom filter is a probabilistic data structure that provides a "probably yes" or "firm no" answer to whether an element is in a set. It can have false positives (saying an element is present when it's not) but no false negatives (saying an element is absent when it's actually present). Once an item is put in the Bloom filter it cannot be removed.
+
+2. **Tradeoff:** Bloom filters trade memory efficiency for occasional false positives. They consume less memory compared to data structures like hash tables, which provide a perfect answer but with higher memory usage.
+
+3. **Use Cases:** Bloom filters are used in various applications:
+   - NoSQL databases use them to reduce disk reads for keys that don't exist.
+   - Content delivery networks (CDNs) use them to prevent caching "one-hit-wonders" and improve caching hit rates.
+   - Web browsers have used them to identify malicious URLs, although more efficient solutions are now required due to the increasing number of malicious URLs.
+   - Password validators use them to prevent users from using weak passwords.
+
+4. **How It Works:** Bloom filters use hash functions to set bits in a bit array. When inserting an element, multiple hash functions are applied to generate indexes, and corresponding bits are set to 1. When querying an element's existence, the same hash functions are applied, and if all corresponding bits are set to 1, the element is probably in the set.
+
+5. **False Positives:** Bloom filters can produce false positives when an element is not present in the set but the filter mistakenly indicates its presence. The frequency of false positives can be controlled by choosing an appropriate size for the Bloom filter based on the expected number of entries.
+
+Overall, Bloom filters provide a space-efficient way to check for membership in a set, although they may occasionally yield false positives. This tradeoff makes them suitable for scenarios where memory efficiency is critical, and occasional errors can be tolerated.
