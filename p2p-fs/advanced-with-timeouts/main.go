@@ -41,80 +41,88 @@ var (
 type Downloader struct {
 	wg   sync.WaitGroup
 	mu   sync.Mutex
-	cond *sync.Cond
+	cond sync.Cond
 
-	chunksDownloaded int
+	downloadedChunks int
 	chunkSet         map[int]bool
 	chunkCh          chan Chunk
 }
 
-func downloadChunksFromPeers(peers []Peer, totalChunks int) {
-	log.Println("Starting download process...")
-
+func initDownloader() *Downloader {
 	dl := &Downloader{
 		chunkSet: make(map[int]bool),
 		chunkCh:  make(chan Chunk),
 	}
-	dl.cond = sync.NewCond(&dl.mu)
 
-	timeout := 1
+	dl.cond = *sync.NewCond(&dl.mu)
+	return dl
+}
+
+func main() {
+	timeOut, totalChunks := 5, len(chunks)
+	dl := initDownloader()
+	dl.downloadChunksFromPeer(peers, totalChunks, timeOut)
+}
+
+func (dl *Downloader) downloadChunksFromPeer(peers []Peer, totalChunks, timeout int) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(timeout)*time.Second)
+	defer cancel()
+
+	// Initiate parallel download process
 	for _, peer := range peers {
 		dl.wg.Add(1)
-		go dl.reqChunkFromPeer(peer, timeout)
+		go dl.pollChunksFromPeer(ctx, peer)
 	}
 
+	// Wait until the entire peers complete their processes
 	go func() {
 		dl.wg.Wait()
 		close(dl.chunkCh)
 	}()
 
+	// Chunk Handler to verify the integrity and download process
 	go func() {
+		dl.mu.Lock()
 		for chunk := range dl.chunkCh {
-			dl.mu.Lock()
-
-			// If the chunk has not yet been downloaded and verified
 			if !dl.chunkSet[chunk.Index] {
-				if dl.VerifyIntegrity(chunk) {
-					log.Printf("Chunk %d integrity verified and added.\n", chunk.Index)
-					dl.chunksDownloaded++
+				if dl.VerifyChunk(chunk) {
+					dl.downloadedChunks++
 					dl.chunkSet[chunk.Index] = true
-					if dl.chunksDownloaded == totalChunks {
-						dl.cond.Broadcast() // Notify all waiting goroutines
+					log.Printf("Chunk%d verified and downloaded successfully \n", chunk.Index)
+					if dl.downloadedChunks == totalChunks {
+						dl.cond.Broadcast()
 					}
 				} else {
-					log.Printf("Chunk %d integrity verification failed.\n", chunk.Index)
+					log.Printf("Verification failed for chunk %d \n", chunk.Index)
 				}
+			} else {
+				log.Printf("Chunk%d already verified and downloaded \n", chunk.Index)
 			}
-
-			dl.mu.Unlock()
 		}
+
+		dl.mu.Unlock()
 	}()
 
+	// Wait until the full chunks are downloaded
 	dl.mu.Lock()
-	for dl.chunksDownloaded != totalChunks {
+	for dl.downloadedChunks != totalChunks {
 		dl.cond.Wait()
 	}
 	dl.mu.Unlock()
 
-	log.Printf("Download process completed. Total chunks downloaded: %d\n", dl.chunksDownloaded)
-
+	log.Printf("Download process completed. Total chunks downloaded: %d\n", dl.downloadedChunks)
 }
 
-func (dl *Downloader) VerifyIntegrity(chunk Chunk) bool {
-	return chunk.Hash == sha256.Sum256(chunk.Data)
-}
-
-func (dl *Downloader) reqChunkFromPeer(peer Peer, timeout int) {
+func (dl *Downloader) pollChunksFromPeer(ctx context.Context, peer Peer) {
 	defer dl.wg.Done()
-
 	log.Printf("Requesting chunks from peer %d\n", peer.id)
 
-	retries := 3
-	for attempt := 0; attempt < retries; attempt++ {
-		ctx, cancel := context.WithTimeout(context.Background(), time.Duration(timeout)*time.Second)
+	retires := 3
+	for attempt := 0; attempt < retires; attempt++ {
+		ctx, cancel := context.WithTimeout(ctx, time.Duration(1)*time.Second)
 		defer cancel()
 
-		chunks, err := pollChunksFromPeer(ctx, peer)
+		chunks, err := getChunksFromPeer(ctx, peer)
 		if err == nil {
 			log.Printf("Successfully retrieved chunks from peer %d on attempt %d\n", peer.id, attempt+1)
 			for _, chunk := range chunks {
@@ -123,17 +131,18 @@ func (dl *Downloader) reqChunkFromPeer(peer Peer, timeout int) {
 			return
 		}
 
-		log.Printf("Attempt %d to retrieve chunks from peer %d failed: %v\n", attempt+1, peer.id, err)
+		// Retry after delay
+		log.Printf("Attempt %d failed due to error %s. Retrying in 500ms \n", attempt, ctx.Err())
 		time.Sleep(500 * time.Millisecond)
 	}
 
-	log.Printf("Failed to retrieve chunks from peer %d after %d attempts\n", peer.id, retries)
 }
 
-func pollChunksFromPeer(ctx context.Context, peer Peer) (chunks []Chunk, err error) {
-	log.Printf("Polling chunks from peer %d\n", peer.id)
+func getChunksFromPeer(ctx context.Context, peer Peer) ([]Chunk, error) {
 
 	for {
+
+		// Simulate network delay
 		time.Sleep(1 * time.Second)
 		select {
 		case <-ctx.Done():
@@ -144,22 +153,9 @@ func pollChunksFromPeer(ctx context.Context, peer Peer) (chunks []Chunk, err err
 			return peer.chunks, nil
 		}
 	}
+
 }
 
-func main() {
-	n := len(chunks)
-
-	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(5)*time.Second)
-	defer cancel()
-
-	for {
-		select {
-		case <-ctx.Done():
-			log.Println("Download process timeout")
-			return
-		default:
-			downloadChunksFromPeers(peers, n)
-			return
-		}
-	}
+func (dl *Downloader) VerifyChunk(chunk Chunk) bool {
+	return chunk.Hash == sha256.Sum256(chunk.Data)
 }

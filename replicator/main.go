@@ -1,84 +1,76 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"sync"
-	"time"
 )
 
-type Msg struct {
-	content string
-}
+var counter int
 
+// Read only
 type Follower struct {
 	id int
-	ch chan Msg
+	ch chan int
 }
 
+// Write/Read
 type Master struct {
-	id            int
-	followersChan []chan Msg
+	mu sync.Mutex
+
+	followersChan []chan int
 }
 
-func (m *Master) Send(wg *sync.WaitGroup) {
-
+func (m *Master) WriteUpdate(wg *sync.WaitGroup) {
 	defer wg.Done()
 
-	log.Println("master starting to send message")
+	log.Println("Master writing update")
 
-	for i := 0; i < 5; i++ {
-		text := fmt.Sprintf("master%d - version:%d \n", m.id, i)
-		msg := Msg{content: text}
+	for i := 0; i < 100; i++ {
+		m.mu.Lock()
+		counter++
+		m.mu.Unlock()
 
-		for _, followerCh := range m.followersChan {
-
-			followerCh <- msg
-
-			// Simulate network delay
-			time.Sleep(1 * time.Second)
+		for i, fChan := range m.followersChan {
+			log.Printf("Sending update to follower%d => Update counter value to %d\n", i, counter)
+			fChan <- counter
 		}
+
 	}
 
-	// Close all follower channels -> Otherwise we have a deadlock
-	for _, followerChan := range m.followersChan {
-		close(followerChan)
+	// Close the channel once communication is done
+	for _, fChan := range m.followersChan {
+		close(fChan)
 	}
 
 }
 
-func (f *Follower) receive(wg *sync.WaitGroup) {
+func (f *Follower) recvUpdate(wg *sync.WaitGroup) {
 	defer wg.Done()
 
-	time.Sleep(1 * time.Second)
+	log.Println("Follower receiving update")
 
-	// IMPORTANT: This reads the msg only once and exits immediately
-	// msg := <-f.ch
-	// log.Printf("Follower %d received: %s\n", f.id, msg.content)
-
-	for message := range f.ch {
-		log.Printf("Follower %d received: %s\n", f.id, message.content)
+	for value := range f.ch {
+		log.Printf("Follower%d received update from master. Counter value updated to %d \n", f.id, value)
 	}
 
-	log.Printf("Follower %d: Channel closed\n", f.id)
 }
 
 func main() {
 
-	master := &Master{id: 0}
+	f1 := &Follower{ch: make(chan int)}
+	f2 := &Follower{id: 1, ch: make(chan int)}
+	f3 := &Follower{id: 2, ch: make(chan int)}
 
-	follower1 := &Follower{id: 1, ch: make(chan Msg)}
-	follower2 := &Follower{id: 2, ch: make(chan Msg)}
-
-	master.followersChan = append(master.followersChan, follower1.ch, follower2.ch)
+	m := &Master{followersChan: make([]chan int, 0)}
+	m.followersChan = append(m.followersChan, f1.ch, f2.ch, f3.ch)
 
 	var wg sync.WaitGroup
 
-	wg.Add(3)
-
-	go follower1.receive(&wg)
-	go follower2.receive(&wg)
-	go master.Send(&wg)
+	wg.Add(4)
+	go m.WriteUpdate(&wg)
+	go f1.recvUpdate(&wg)
+	go f2.recvUpdate(&wg)
+	go f3.recvUpdate(&wg)
 
 	wg.Wait()
 }

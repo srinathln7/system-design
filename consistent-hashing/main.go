@@ -63,15 +63,8 @@ func (hr *HashRing) DeleteNodeFromRing(node string) {
 		return
 	}
 
-	var nodes []int
-	if index != 0 {
-		nodes = append(nodes, hr.nodes[0:index-1]...)
-		nodes = append(nodes, hr.nodes[index+1:]...)
-	} else {
-		nodes = append(nodes, hr.nodes[1:]...)
-	}
-
-	hr.nodes = nodes
+	// Delete element at `index`
+	hr.nodes = append(hr.nodes[:index], hr.nodes[index+1:]...)
 	delete(hr.hashMap, nodeID)
 
 	log.Printf("succesfully deleted node %s with id %d from the ring", node, nodeID)
