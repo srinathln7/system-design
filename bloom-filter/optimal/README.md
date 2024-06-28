@@ -1,7 +1,3 @@
-Here's a properly formatted `README.md` file incorporating all the details you provided:
-
----
-
 # Optimal Bloom Filter
 
 A Bloom filter is a space-efficient probabilistic data structure designed to test whether an element is a member of a set. This implementation calculates the optimal parameters for the Bloom filter and uses bit manipulation techniques to efficiently manage memory and operations.
