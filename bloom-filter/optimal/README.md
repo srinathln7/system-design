@@ -2,6 +2,52 @@
 
 A Bloom filter is a space-efficient probabilistic data structure designed to test whether an element is a member of a set. This implementation calculates the optimal parameters for the Bloom filter and uses bit manipulation techniques to efficiently manage memory and operations.
 
+Bloom filters use hash functions to map elements to positions in a bit array, and MurmurHash is one of the popular choices for several reasons:
+
+1. **Speed**:
+    - MurmurHash is designed to be fast. It can process large amounts of data quickly, which is essential for applications like Bloom filters that require multiple hash computations for each insertion and lookup.
+
+2. **Uniform Distribution**:
+    - MurmurHash produces a uniform distribution of hash values. This property ensures that the bits in the Bloom filter are set and checked evenly, which helps in maintaining the desired false positive rate. Uniform distribution prevents clustering of bits, which would otherwise lead to increased false positives.
+
+3. **Non-Cryptographic Hash Function**:
+    - MurmurHash is a non-cryptographic hash function, meaning it is not designed to be secure against adversaries. However, for Bloom filters, the primary requirements are speed and distribution uniformity rather than cryptographic security.
+
+4. **Deterministic Output**:
+    - MurmurHash is deterministic, meaning it will always produce the same output for the same input. This property is crucial for Bloom filters, as the same element needs to hash to the same positions in the bit array every time it is processed.
+
+5. **Low Collision Rate**:
+    - MurmurHash has a low collision rate compared to simpler hash functions like modulo or division. Collisions (where two different inputs produce the same hash value) can increase the false positive rate in a Bloom filter. MurmurHash's design minimizes this risk, ensuring better accuracy for the filter.
+
+6. **Flexibility**:
+    - MurmurHash can produce 32-bit, 64-bit, or 128-bit hash values, offering flexibility depending on the requirements of the Bloom filter implementation. The 128-bit version, for example, provides a very large space to reduce collisions further.
+
+7. **Simplicity**:
+    - The implementation of MurmurHash is relatively simple and does not require complex operations or large libraries, making it easy to integrate into various applications, including Bloom filters.
+
+### Example of Usage in Bloom Filter
+
+In a Bloom filter, multiple hash functions are typically used. One way to generate multiple hash functions efficiently is to use a single base hash function (like MurmurHash) and modify it slightly (e.g., using different seeds) to simulate multiple independent hash functions. This is both computationally efficient and effective in maintaining a low false positive rate.
+
+Here's a brief summary of why MurmurHash is favored in Bloom filters:
+
+- **Speed**: Fast processing of elements.
+- **Uniform Distribution**: Even spread of bits in the array.
+- **Deterministic**: Consistent output for the same input.
+- **Low Collision Rate**: Reduced false positives.
+- **Flexibility**: Various bit-length outputs.
+- **Simplicity**: Easy to implement and use.
+
+These characteristics make MurmurHash an excellent choice for the hash functions used in Bloom filters.
+
+## Memory Efficiency of byte Array vs. bool Array
+Using a byte array instead of a bool array can save a significant amount of memory. Here’s how:
+
+-* A bool in Go typically takes up 1 byte (8 bits) of memory.
+-* A byte also takes up 1 byte (8 bits) of memory, but it can represent 8 different boolean values (one per bit).
+
+So, if we use a bool array of size m, it will take up m bytes. In contrast, using a byte array of size m/8 will take up m/8 bytes, thus reducing the memory usage by a factor of 8.
+
 ## Overview
 
 In calculating the optimal parameters for a Bloom filter, the use of `math.Ceil` and `math.Round` functions ensures that the parameters are appropriately sized to meet the desired false positive probability and expected number of elements. Here's why each function is used:

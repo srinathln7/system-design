@@ -12,88 +12,92 @@ type bloomfilter struct {
 	hashFuncs []func([]byte) int
 }
 
-// newOptimalBloomFilter creates a new Bloom filter with optimal parameters.
-func newOptimalBloomFilter(n int, p float64) bloomfilter {
-	m, k := calcOptimalParams(n, p) // Calculate bit size (m) and number of hash functions (k)
-	size := (m + 7) / 8             // Calculate byte size
-	hashFuncs := make([]func([]byte) int, k)
-	for i := 0; i < k; i++ {
-		hashFuncs[i] = makeHashFunc(i, m) // Pass bit size to makeHashFunc
-	}
-
-	return bloomfilter{
-		bits:      make([]byte, size), // Initialize bit array
-		hashFuncs: hashFuncs,          // Assign hash functions
-	}
-}
-
-// calcOptimalParams calculates the optimal size of the bit array (m) and number of hash functions (k).
 func calcOptimalParams(n int, p float64) (m, k int) {
-	m = int(math.Ceil(-float64(n) * math.Log(p) / (math.Ln2 * math.Ln2))) // Calculate bit size
-	k = int(math.Round(float64(m) * math.Ln2 / float64(n)))               // Calculate number of hash functions
+
+	// Calc. `m` and `k` based on the derived formula
+	// m = - n * ln(p) /(ln(2))^2  => bit size
+	// p = m/n * ln(2) => num of hash functions
+
+	m = int(math.Ceil(-float64(n) * math.Log(p) / (math.Ln2 * math.Ln2)))
+	k = int(math.Round(float64(m) * math.Ln2 / float64(n)))
 	return m, k
 }
 
-// makeHashFunc creates a hash function with a given seed and size.
-func makeHashFunc(seed, size int) func([]byte) int {
+func newOptimalBloomFilter(n int, p float64) bloomfilter {
+
+	// `m` => bit size, `k` => no. of hash functions
+	m, k := calcOptimalParams(n, p)
+
+	hashFuncs := make([]func([]byte) int, k)
+	for i := 0; i < k; i++ {
+		// Pass bit size to genHashFunc
+		hashFuncs[i] = genHashFunc(i, m)
+	}
+
+	return bloomfilter{
+		bits:      make([]byte, (m+7)/8),
+		hashFuncs: hashFuncs,
+	}
+}
+
+func genHashFunc(seed, size int) func(data []byte) int {
 	return func(data []byte) int {
 		h1, h2 := murmur3.Sum128WithSeed(data, uint32(seed))
-		return int((h1 + h2) % uint64(size)) // Use bit size for modulo operation
+		return int((h1 + h2) % uint64(size))
 	}
 }
 
-// Add adds an element to the Bloom filter.
 func (bf bloomfilter) Add(data []byte) {
 	for _, hashFunc := range bf.hashFuncs {
-		idx := hashFunc(data)            // Get the bit index from hash function
-		bf.bits[idx/8] |= 1 << (idx % 8) // Set the corresponding bit
+		idx := hashFunc(data)
+
+		// Perform bit wise operation. Change only the necessary bits and keep other unchanged
+		bf.bits[idx/8] |= 1 << (idx % 8)
 	}
 }
 
-// Contains checks if an element is in the Bloom filter.
 func (bf bloomfilter) Contains(data []byte) bool {
 	for _, hashFunc := range bf.hashFuncs {
-		idx := hashFunc(data)                 // Get the bit index from hash function
-		if bf.bits[idx/8]&(1<<(idx%8)) == 0 { // Check if the corresponding bit is set
+		idx := hashFunc(data)
+
+		if bf.bits[idx/8]&(1<<(idx%8)) == 0 {
 			return false
 		}
 	}
-	return true // All bits are set, element might be in the set
+
+	return true
 }
 
 func main() {
-	n := 1000 // Expected number of elements
-	p := 0.01 // Desired false positive probability
+	n, p := 10000, 0.01
 
 	obf := newOptimalBloomFilter(n, p)
-
-	// Add elements to the Bloom filter
-	elements := [][]byte{
+	datas := [][]byte{
 		[]byte("apple"),
 		[]byte("banana"),
-		[]byte("cherry"),
+		[]byte("chiros"),
+		[]byte("doctor"),
 	}
 
-	for _, elem := range elements {
-		obf.Add(elem)
+	for _, data := range datas {
+		obf.Add(data)
 	}
 
-	// Check if elements are in the Bloom filter
-	testElements := [][]byte{
+	tests := [][]byte{
 		[]byte("apple"),
+		[]byte("eagle"),
+		[]byte("hen"),
 		[]byte("banana"),
-		[]byte("cherry"),
-		[]byte("date"),
-		[]byte("honey"),
-		[]byte("sugar"),
-		[]byte("sirup"),
+		[]byte("chiros"),
+		[]byte("doctor"),
+		[]byte("mango"),
 	}
 
-	for _, elem := range testElements {
-		if obf.Contains(elem) {
-			fmt.Printf("%s might be in the set\n", elem)
+	for _, test := range tests {
+		if obf.Contains(test) {
+			fmt.Printf("%s might be in the set\n", string(test))
 		} else {
-			fmt.Printf("%s is definitely not in the set\n", elem)
+			fmt.Printf("%s definitely not in the set\n", string(test))
 		}
 	}
 }
