@@ -9,52 +9,56 @@ import (
 
 type bloomfilter struct {
 	bits      []byte
-	hashFuncs []func([]byte) uint32
+	hashFuncs []func([]byte) int
 }
 
+// newOptimalBloomFilter creates a new Bloom filter with optimal parameters.
 func newOptimalBloomFilter(n int, p float64) bloomfilter {
-	m, k := calcOptimalParams(n, p)
-	size := (m + 7) / 8
-	hashFuncs := make([]func([]byte) uint32, k)
+	m, k := calcOptimalParams(n, p) // Calculate bit size (m) and number of hash functions (k)
+	size := (m + 7) / 8             // Calculate byte size
+	hashFuncs := make([]func([]byte) int, k)
 	for i := 0; i < k; i++ {
-		hashFuncs[i] = makeHashFunc(uint32(i), uint32(size))
+		hashFuncs[i] = makeHashFunc(i, m) // Pass bit size to makeHashFunc
 	}
 
 	return bloomfilter{
-		bits:      make([]byte, size),
-		hashFuncs: hashFuncs,
+		bits:      make([]byte, size), // Initialize bit array
+		hashFuncs: hashFuncs,          // Assign hash functions
 	}
 }
 
+// calcOptimalParams calculates the optimal size of the bit array (m) and number of hash functions (k).
 func calcOptimalParams(n int, p float64) (m, k int) {
-	m = int(math.Ceil(float64(-n)*math.Log(p)) / (math.Ln2 * math.Ln2))
-	k = int(math.Round((float64(m) * math.Ln2) / float64(n)))
+	m = int(math.Ceil(-float64(n) * math.Log(p) / (math.Ln2 * math.Ln2))) // Calculate bit size
+	k = int(math.Round(float64(m) * math.Ln2 / float64(n)))               // Calculate number of hash functions
 	return m, k
 }
 
-func makeHashFunc(seed, size uint32) func([]byte) uint32 {
-	return func(data []byte) uint32 {
+// makeHashFunc creates a hash function with a given seed and size.
+func makeHashFunc(seed, size int) func([]byte) int {
+	return func(data []byte) int {
 		h1, h2 := murmur3.Sum128WithSeed(data, uint32(seed))
-		return uint32((h1 + h2) % uint64(size))
+		return int((h1 + h2) % uint64(size)) // Use bit size for modulo operation
 	}
 }
 
+// Add adds an element to the Bloom filter.
 func (bf bloomfilter) Add(data []byte) {
 	for _, hashFunc := range bf.hashFuncs {
-		idx := hashFunc(data)
-		bf.bits[idx/8] |= 1 << (idx % 8)
+		idx := hashFunc(data)            // Get the bit index from hash function
+		bf.bits[idx/8] |= 1 << (idx % 8) // Set the corresponding bit
 	}
 }
 
+// Contains checks if an element is in the Bloom filter.
 func (bf bloomfilter) Contains(data []byte) bool {
 	for _, hashFunc := range bf.hashFuncs {
-		idx := hashFunc(data)
-		if bf.bits[idx/8]&(1<<(idx%8)) == 0 {
+		idx := hashFunc(data)                 // Get the bit index from hash function
+		if bf.bits[idx/8]&(1<<(idx%8)) == 0 { // Check if the corresponding bit is set
 			return false
 		}
 	}
-
-	return true
+	return true // All bits are set, element might be in the set
 }
 
 func main() {
